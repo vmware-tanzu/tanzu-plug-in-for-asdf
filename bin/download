@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Copyright 2022 VMware, Inc.
+# SPDX-License-Identifier: Apache 2.0
+
+[[ -z ${DEBUGX:-} ]] || set -x
+set -euo pipefail
+
+# Detect the tool name based on the plugin directory name used by asdf
+readonly script_dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly file_name="$(basename "$(dirname "${script_dir}")")"
+readonly os=$(uname -s |awk '{print tolower($0)}')
+readonly version=$ASDF_INSTALL_VERSION
+readonly asdf_download_path=$ASDF_DOWNLOAD_PATH
+readonly download_dir="$(mktemp -d -t "asdf_${file_name}_XXXXXXXX")"
+trap 'rm -rf "${download_dir}"' EXIT
+
+. "${script_dir}/../products.inc.sh" "${file_name}" "${version}" "${os}"
+
+if [[ ${MISSING_PRODUCTS[*]} =~ "${file_name}_${os}" ]]; then
+  echo -e "\nError message: ${file_name} is not available for OS type ${os}\n" >&2
+  exit 1
+fi
+
+function extract_and_move() {
+  local -r downloaded_file="$1"
+
+  case "$PRIMARY_GIT_TEMPLATE" in
+    *.tar.gz|*.tgz)
+      echo "Extracting tar for ${file_name}"
+      tar xvfz "${downloaded_file}" -C "${download_dir}/" > /dev/null
+      move_largest_file "${downloaded_file}"
+      ;;
+    *.gz)
+      echo "Extracting gzip for ${file_name}"
+      gzip -dc "${downloaded_file}" > "${asdf_download_path}/${file_name}"
+      ;;
+    *.zip)
+      echo "Extracting zip for ${file_name}"
+      unzip "${downloaded_file}" -d "${download_dir}" #> /dev/null
+      move_largest_file "${downloaded_file}"
+      ;;
+    *)
+      mv "${downloaded_file}" "${asdf_download_path}/${file_name}"
+      ;;
+  esac
+}
+
+function move_largest_file() {
+  local -r downloaded_file="$1"
+  rm "${downloaded_file}"
+
+  # Select the largest extracted file starting with file_name
+  extracted_file="$( ls -d -1 "${download_dir}/${file_name}"* | head -n 1 )"
+
+  # if tar/zip outputs a directory, select the largest file as the target
+  if [[ -d ${extracted_file} ]]; then
+    extracted_file="$( ls -Sd -1 "${extracted_file}/"* | head -n 1 )"
+  fi
+
+  mv "${extracted_file}" "${asdf_download_path}/${file_name}"
+}
+
+function download_binary() {
+  local git_file_name_template="$1"
+
+  local -r github_url="https://github.com/${REPO_SLUG}/releases/download/${git_file_name_template}"
+  local -r downloaded_file="${download_dir}/${file_name}_download"
+
+  local curl_args=(
+    -L
+  )
+
+  # Validate HTTP 200 OK on download by checking headers only
+  # This enables failure handling whilst also printing download progress
+  local return=0 && check="$(curl "${curl_args[@]}" --fail --head --connect-timeout 10 "$github_url" 2>&1)" || return="$?"
+  if [[ $return -eq 0 ]]; then
+    echo "Downloading $file_name version $version"
+    curl "${curl_args[@]}" --output "$downloaded_file" "$github_url"
+    extract_and_move "$downloaded_file"
+
+  elif [ ! -z "$SECONDARY_GIT_TEMPLATE" ] && [ ! -f "${download_dir}/secondard_attempt" ]; then
+    touch "${download_dir}/secondard_attempt"
+    download_binary "$SECONDARY_GIT_TEMPLATE"
+
+  else
+    # Show the human readable error
+    local -r error_message=$(curl "${curl_args[@]}" --silent "$github_url" 2>&1)
+    echo "ERROR: Failure download $file_name version $version" >&2
+    echo "Attempted URL: $github_url" >&2
+    echo "Error message: $error_message" >&2
+    exit 1
+  fi
+}
+
+download_binary $PRIMARY_GIT_TEMPLATE

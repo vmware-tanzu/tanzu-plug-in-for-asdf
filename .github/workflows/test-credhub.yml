@@ -1,0 +1,60 @@
+name: test-credhub
+on: [push, pull_request]
+
+jobs:
+  test-latest:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install asdf and checkout latest tag
+      run: |
+        set -e
+
+        if [ -n "$GITHUB_RUN_ID" ]; then
+            export GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+        fi
+
+        ./tests/setup-env.sh
+
+    - name: Test asdf script
+      run: |
+        set -e
+
+        if [ -n "$GITHUB_RUN_ID" ]; then
+            export GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+        fi
+
+        ./tests/run-tests.sh credhub
+
+  test-0-6-3:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Manually add plugings to repository
+      run: |
+        set -e
+        export ASDF_LEGACY=true
+
+        if [ -n "$GITHUB_RUN_ID" ]; then
+            export GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+        fi
+
+        ./tests/setup-env.sh
+    - name: Test plugin
+      run: |
+        set -e
+        export ASDF_LEGACY=true
+
+        if [ -n "$GITHUB_RUN_ID" ]; then
+            export GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+        fi
+
+        ./tests/run-tests.sh credhub

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Copyright 2022 VMware, Inc.
+# SPDX-License-Identifier: Apache 2.0
+
+[[ -z ${DEBUGX:-} ]] || set -x
+set -euo pipefail
+
+# Detect the tool name based on the plugin directory name used by asdf
+readonly script_dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly file_name="$(basename "$(dirname "${script_dir}")")"
+readonly install_path=$ASDF_INSTALL_PATH
+readonly asdf_download_path=${ASDF_DOWNLOAD_PATH:-$(mktemp -d -t "asdf_${file_name}_XXXXXXXX")}
+trap 'rm -rf "${asdf_download_path}"' EXIT
+
+function install_binary() {
+
+  local -r bin_install_path="${install_path}/bin"
+
+  if [[ -z "${ASDF_DOWNLOAD_PATH:-}" ]]; then
+    export ASDF_DOWNLOAD_PATH=$asdf_download_path
+    $script_dir/download
+  fi
+
+  echo "Creating bin install directory"
+  mkdir -p $bin_install_path
+  mv $asdf_download_path/* ${bin_install_path}/${file_name}
+  echo "Setting ${bin_install_path}/${file_name} as executable"
+  chmod +x ${bin_install_path}/${file_name}
+}
+
+
+install_binary
