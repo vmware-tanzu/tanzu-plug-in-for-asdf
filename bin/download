@@ -53,8 +53,6 @@ function move_largest_file() {
   # Select the largest extracted file starting with file_name
   extracted_file="$( find $download_path -type f -exec du -ah {} + | sort -rh | head -1 | awk '{print $2}' )"
 
-  find ~/Downloads -type f -exec du -ah {} + | sort -rh | awk 'NR==1 {print $1, $2}'
-
   mv "${extracted_file}" "${asdf_download_path}/${file_name}"
 }
 
