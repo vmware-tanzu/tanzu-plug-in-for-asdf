@@ -1,4 +1,4 @@
-name: test-uaa-cli
+name: test-tanzu-cli
 on: [push, pull_request]
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
             export GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
         fi
 
-        ./tests/run-tests.sh tanzu-cli
+        ./tests/run-tests.sh tanzu
 
   test-0-6-3:
     strategy:
@@ -57,4 +57,4 @@ jobs:
             export GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
         fi
 
-        ./tests/run-tests.sh tanzu-cli
+        ./tests/run-tests.sh tanzu
