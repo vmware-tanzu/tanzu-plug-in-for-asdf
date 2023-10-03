@@ -27,6 +27,7 @@ function test_plugin() {
   . "${script_dir}/../products.inc.sh" "${plugin_name}"
 
   echo "Adding plugin $plugin_name"
+  rm -rf "${HOME}/.asdf/plugins/${plugin_name}"
   mkdir -p "${HOME}/.asdf/plugins/${plugin_name}"
   cp -r "$repo_dir" "${HOME}/.asdf/plugins/${plugin_name}"
 
@@ -58,6 +59,7 @@ function test_plugin() {
 function test_plugins() {
   plugin_name="${1:-}"
   if [ -z "${plugin_name:-}" ]; then
+    test_plugin tanzu
     test_plugin kpack-cli
     test_plugin uaa-cli
     test_plugin om
