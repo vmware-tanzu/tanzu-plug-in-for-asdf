@@ -47,15 +47,11 @@ function extract_and_move() {
 
 function move_largest_file() {
   local -r downloaded_file="$1"
+  local -r download_path=$(dirname $downloaded_file)
   rm "${downloaded_file}"
 
   # Select the largest extracted file starting with file_name
-  extracted_file="$( ls -d -1 "${download_dir}/${file_name}"* | head -n 1 )"
-
-  # if tar/zip outputs a directory, select the largest file as the target
-  if [[ -d ${extracted_file} ]]; then
-    extracted_file="$( ls -Sd -1 "${extracted_file}/"* | head -n 1 )"
-  fi
+  extracted_file="$( find $download_path -type f -exec du -ah {} + | sort -rh | head -1 | awk '{print $2}' )"
 
   mv "${extracted_file}" "${asdf_download_path}/${file_name}"
 }

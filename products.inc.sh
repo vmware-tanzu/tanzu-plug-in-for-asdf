@@ -48,9 +48,9 @@ setEnv() {
       VERSION_COMMAND='--version'
       ;;
     credhub)
-      REPO_SLUG='cloudfoundry-incubator/credhub-cli'
-      PRIMARY_GIT_TEMPLATE="${v}/credhub-${o}-${v}.tgz"
-      SECONDARY_GIT_TEMPLATE=""
+      REPO_SLUG='cloudfoundry/credhub-cli'
+      PRIMARY_GIT_TEMPLATE="${v}/credhub-${o}-amd64-${v}.tgz"
+      SECONDARY_GIT_TEMPLATE="${v}/credhub-${o}-${v}.tgz"
       VERSION_COMMAND='--version'
       ;;
     fly)
@@ -76,6 +76,12 @@ setEnv() {
       PRIMARY_GIT_TEMPLATE="v${v}/pivnet-${o}-amd64-${v}"
       SECONDARY_GIT_TEMPLATE=""
       VERSION_COMMAND='version'
+      ;;
+    tanzu)
+      REPO_SLUG='vmware-tanzu/tanzu-cli'
+      PRIMARY_GIT_TEMPLATE="v${v}/tanzu-cli-${o}-amd64.tar.gz"
+      SECONDARY_GIT_TEMPLATE=""
+      VERSION_COMMAND='version' #| grep version | sed -n -e "s/^.*version: v//p"
       ;;
     uaa-cli)
       REPO_SLUG='cloudfoundry/uaa-cli'

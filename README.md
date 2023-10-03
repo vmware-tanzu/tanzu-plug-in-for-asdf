@@ -13,6 +13,7 @@ ASDF allows you to install multiple versions of a single tool and switch between
 - kpack
 - om
 - pivnet
+- tanzu-cli
 - uaa-cli
 
 ## Prerequisites
