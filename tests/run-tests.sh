@@ -60,7 +60,7 @@ function test_plugins() {
   plugin_name="${1:-}"
   if [ -z "${plugin_name:-}" ]; then
     test_plugin tanzu
-    test_plugin kpack-cli
+    test_plugin kp
     test_plugin uaa-cli
     test_plugin om
     test_plugin pivnet
