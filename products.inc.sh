@@ -59,7 +59,7 @@ setEnv() {
       SECONDARY_GIT_TEMPLATE=""
       VERSION_COMMAND='--version'
       ;;
-    kpack-cli)
+    kp)
       REPO_SLUG='vmware-tanzu/kpack-cli'
       PRIMARY_GIT_TEMPLATE="v${v}/kp-${o}-amd64-${v}"
       SECONDARY_GIT_TEMPLATE="v${v}/kp-${o}-${v}"
