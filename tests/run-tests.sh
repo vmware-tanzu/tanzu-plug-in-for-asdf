@@ -16,7 +16,18 @@ sep=" "
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 repo_dir="$script_dir/.."
 
+function checkBinaryArch() {
+  local plugin_name=$1
+  local wanted_arch=$(a=$(uname -m) && ([ $a = aarch64 ] || [ $a = arm64 ]) && printf arm64 || printf x86)
 
+  # Add below the plugins that install the proper architecture.
+  case $plugin_name in
+  tanzu):
+    echo -e "\nChecking $plugin_name is of arch $wanted_arch"
+    file $(asdf which "$plugin_name") | grep $wanted_arch
+    ;;
+  esac
+}
 
 function test_plugin() {
   local plugin_name=$1
@@ -51,6 +62,8 @@ function test_plugin() {
     echo "Running command '$plugin_name $VERSION_COMMAND'"
     "$plugin_name" "$VERSION_COMMAND"
   fi
+
+  checkBinaryArch $plugin_name
 
   echo -e "\n####### Finished: $plugin_name"
   echo -e "#########################################\n"
