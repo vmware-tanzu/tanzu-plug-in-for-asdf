@@ -11,6 +11,7 @@ setEnv() {
   local product="${1:-}"
   local v="${2:-}"
   local o="${3:-}"
+  local a="${4:-}"
 
   # To add a product create a case statement matching the file name and add variables as follows
   # REPO_SLUG
@@ -78,8 +79,13 @@ setEnv() {
       VERSION_COMMAND='version'
       ;;
     tanzu)
+      # Tanzu CLI only started supporting ARM64 natively for darwin with version 1.1.0*
+      # we therefore use the AMD64 version for older versions
+      if [[ "${o}" == "darwin" && "${v}" < "1.1.0" ]]; then
+        a="amd64"
+      fi
       REPO_SLUG='vmware-tanzu/tanzu-cli'
-      PRIMARY_GIT_TEMPLATE="v${v}/tanzu-cli-${o}-amd64.tar.gz"
+      PRIMARY_GIT_TEMPLATE="v${v}/tanzu-cli-${o}-${a}.tar.gz"
       SECONDARY_GIT_TEMPLATE=""
       VERSION_COMMAND='version' #| grep version | sed -n -e "s/^.*version: v//p"
       ;;
@@ -95,9 +101,11 @@ setEnv() {
       ;;
   esac
   
-  # MISSING_PRODUCTS is used to highlight products that aren't available for an OS type
+  # MISSING_PRODUCTS is used to highlight products that aren't available for an OS_ARCH type
   MISSING_PRODUCTS=(
-    "bbr-s3-config-validator_darwin"
+    "bbr-s3-config-validator_darwin_amd64"
+    "bbr-s3-config-validator_darwin_arm64"
+    "tanzu_linux_arm64"
   )
 
   declare -rx REPO_SLUG GIT_FILE_NAME_TEMPLATE VERSION_COMMAND

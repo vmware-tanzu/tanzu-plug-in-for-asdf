@@ -5,7 +5,7 @@ jobs:
   test-latest:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, macos-latest-large] # macos-latest is ARM64 while macos-latest-large is x86
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout code

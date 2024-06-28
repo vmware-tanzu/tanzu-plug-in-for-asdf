@@ -29,7 +29,7 @@ asdf install bosh 7.0.0
 asdf global bosh 7.0.0
 ```
 
-To manually install use the following, where tool name is one of the support tools listed above:
+To manually install use the following, where tool name is one of the supported tools listed above:
 ```
 asdf plugin-add <tool name> https://github.com/vmware-tanzu/tanzu-plug-in-for-asdf.git
 ```

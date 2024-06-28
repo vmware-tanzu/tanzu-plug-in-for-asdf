@@ -9,15 +9,16 @@ set -euo pipefail
 readonly script_dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly file_name="$(basename "$(dirname "${script_dir}")")"
 readonly os=$(uname -s |awk '{print tolower($0)}')
+readonly arch=$(a=$(uname -m) && ([ $a = aarch64 ] || [ $a = arm64 ]) && printf arm64 || printf amd64)
 readonly version=$ASDF_INSTALL_VERSION
 readonly asdf_download_path=$ASDF_DOWNLOAD_PATH
 readonly download_dir="$(mktemp -d -t "asdf_${file_name}_XXXXXXXX")"
 trap 'rm -rf "${download_dir}"' EXIT
 
-. "${script_dir}/../products.inc.sh" "${file_name}" "${version}" "${os}"
+. "${script_dir}/../products.inc.sh" "${file_name}" "${version}" "${os}" "${arch}"
 
-if [[ ${MISSING_PRODUCTS[*]} =~ "${file_name}_${os}" ]]; then
-  echo -e "\nError message: ${file_name} is not available for OS type ${os}\n" >&2
+if [[ ${MISSING_PRODUCTS[*]} =~ "${file_name}_${os}_${arch}" ]]; then
+  echo -e "\nError message: ${file_name} is not available for OS type ${os}_${arch}\n" >&2
   exit 1
 fi
 
