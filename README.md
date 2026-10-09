@@ -1,6 +1,6 @@
 # tanzu-plug-in-for-asdf
 
-ASDF plugin to VMware Tanzu install tools from github on x86 Mac and Linux. Note most tools ship with 64 bit binaries.
+ASDF plugin for installing VMware Tanzu tools from GitHub. ARM64 is selected for products and versions that publish matching binaries.
 
 ASDF allows you to install multiple versions of a single tool and switch between them either globally or on a per shell basis.
 
